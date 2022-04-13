@@ -2,33 +2,42 @@
 - hosts: teleport
   become: yes
   tasks: 
-    - name: Add Teleport GPG public key
-      shell: |
-        curl https://deb.releases.teleport.dev/teleport-pubkey.asc \
-         -o /usr/share/keyrings/teleport-archive-keyring.asc
+    # - name: Add Teleport GPG public key
+    #   shell: |
+    #     curl https://deb.releases.teleport.dev/teleport-pubkey.asc \
+    #      -o /usr/share/keyrings/teleport-archive-keyring.asc
 
-    - name: add Teleport official repository
-      shell: |
-        echo "deb [signed-by=/usr/share/keyrings/teleport-archive-keyring.asc] \
-        https://deb.releases.teleport.dev/ stable main" \
-        | sudo tee /etc/apt/sources.list.d/teleport.list > /dev/null
+    # - name: add Teleport official repository
+    #   shell: |
+    #     echo "deb [signed-by=/usr/share/keyrings/teleport-archive-keyring.asc] \
+    #     https://deb.releases.teleport.dev/ stable main" \
+    #     | sudo tee /etc/apt/sources.list.d/teleport.list > /dev/null
     
-    - name: Update the apt package index
-      become: yes
-      apt:
-        name: "*"
-        state: latest
-        update_cache: yes
-        force_apt_get: yes
+    # - name: Update the apt package index
+    #   become: yes
+    #   apt:
+    #     name: "*"
+    #     state: latest
+    #     update_cache: yes
+    #     force_apt_get: yes
 
-    - name: Configure Teleport
-      shell: |
-        teleport configure --acme \
-        --acme-email=josepheshiett@gmail.com \
-        --cluster-name=test.joeshiett.xyz | \
-        sudo tee /etc/teleport.yaml > /dev/null
+    # - name: Configure Teleport
+    #   shell: |
+    #     teleport configure --acme \
+    #     --acme-email=josepheshiett@gmail.com \
+    #     --cluster-name=test.joeshiett.xyz \
+    #     | tee /etc/teleport.yaml > /dev/null
 
-    - name: install Teleport
+    # - name: install Teleport
+    #   shell: |
+    #     apt-get install teleport
+    #     systemctl start teleport
+
+    - name: Create Teleport User
       shell: |
-        apt-get install teleport
-        systemctl start teleport
+        tctl users add teleport-admins \ 
+        --roles=editor,access \
+        --logins=root,ubuntu,ec2-user
+      register: command_output
+    - debug: 
+        var: command_output.stdout_lines
