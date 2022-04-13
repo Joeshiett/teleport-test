@@ -1,0 +1,22 @@
+- hosts: test
+  become: yes
+  tasks:
+    - name: Ensures App Dir Exists
+      file: path=/home/teleport-agent state=directory
+
+    - name: Download Teleport Agent tar
+      shell: |
+        wget https://get.gravitational.com/teleport-v9.0.4-linux-amd64-bin.tar.gz
+        tar -xzvf teleport-v9.0.4-linux-amd64-bin.tar.gz
+      args:
+        chdir: /home/teleport-agent
+
+    - name: Install Teleport Agent
+      shell: |
+        sudo bash install
+        teleport start \
+         --roles=node \
+         --token=9f6a5a37e73125b18f23b03a393a8363 \
+         --auth-server=170.187.137.197:443 
+      args:
+        chdir: /home/teleport-agent/teleport/
