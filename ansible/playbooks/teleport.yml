@@ -33,19 +33,34 @@
         url: https://deb.releases.teleport.dev/teleport-pubkey.asc
         state: present
 
-    - name: add docker official repository for Debian Stretch
+    - name: add Teleport official repository
       become: yes
       apt_repository:
-        repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
+        repo: deb [signed-by=/usr/share/keyrings/teleport-archive-keyring.asc] https://deb.releases.teleport.dev/ stable main
         state: present
+    
     - name: Index new repo into the cache
-    - name: Install Teleport
-      shell: |
-        sudo curl https://deb.releases.teleport.dev/teleport-pubkey.asc \
-        -o /usr/share/keyrings/teleport-archive-keyring.asc
-        echo "deb [signed-by=/usr/share/keyrings/teleport-archive-keyring.asc] https://deb.releases.teleport.dev/ stable main" \
-        | sudo tee /etc/apt/sources.list.d/teleport.list > /dev/null
-        sudo apt-get update
-        sudo apt-get install teleport
+      become: yes
+      apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: install Teleport
+      become: yes
+      apt:
+        name: teleport
+        state: latest
+        update_cache: yes
+     
+    # - name: Install Teleport
+    #   shell: |
+    #     sudo curl https://deb.releases.teleport.dev/teleport-pubkey.asc \
+    #     -o /usr/share/keyrings/teleport-archive-keyring.asc
+    #     echo "deb [signed-by=/usr/share/keyrings/teleport-archive-keyring.asc] https://deb.releases.teleport.dev/ stable main" \
+    #     | sudo tee /etc/apt/sources.list.d/teleport.list > /dev/null
+    #     sudo apt-get update
+    #     sudo apt-get install teleport
       
-      chdir: /home/ap
+    #   chdir: /home/ap
